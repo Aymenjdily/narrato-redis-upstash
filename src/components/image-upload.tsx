@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 
 import { useRef, useState } from "react";
@@ -6,11 +5,13 @@ import { useRef, useState } from "react";
 import { IKImage, IKUpload, ImageKitProvider } from "imagekitio-next";
 import { Upload } from "lucide-react";
 
+import { toast } from "@/hooks/use-toast";
 import config from "@/lib/config";
 
 import { Button } from "./ui/button";
 
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const authenticater = async () => {
   try {
@@ -39,11 +40,25 @@ type ImageUpload = {
 const ImageUpload = ({ onFileChange }: ImageUpload) => {
   const ref = useRef(null);
   const [file, setFile] = useState<{ filePath: string } | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const handleError = () => {};
-  const handleSuccess = (res) => {
+  const handleError = (error: any) => {
+    console.log("UPLOAD_ERROR", error);
+
+    toast({
+      title: "Image upload failed",
+      description: "Your image could not be uplaoded. Please try again",
+      variant: "destructive",
+    });
+  };
+
+  const handleSuccess = (res: any) => {
     setFile(res);
     onFileChange(res.filePath);
+    toast({
+      title: "Image uploaded successfully",
+      description: `${res.filePath} uploaded successfully!`,
+    });
   };
 
   return (
@@ -64,7 +79,7 @@ const ImageUpload = ({ onFileChange }: ImageUpload) => {
           e.preventDefault();
 
           if (ref.current) {
-            // @ts-expect-error
+            // @ts-ignore
             ref.current?.click();
           }
         }}
@@ -75,12 +90,14 @@ const ImageUpload = ({ onFileChange }: ImageUpload) => {
         {file && <p>{file.filePath}</p>}
       </Button>
       {file && (
-        <IKImage
-          alt={file.filePath}
-          path={file.filePath}
-          width={500}
-          height={500}
-        />
+        <div className="relative aspect-auto h-[400px] w-full">
+          <IKImage
+            alt={file.filePath}
+            path={file.filePath}
+            fill
+            className="object-cover object-center"
+          />
+        </div>
       )}
     </ImageKitProvider>
   );

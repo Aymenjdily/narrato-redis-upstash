@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Jost, Knewave } from "next/font/google";
 
+import { Toaster } from "sonner";
+
 import { ThemeProvider } from "@/providers/theme-provider";
 
 import "./globals.css";
@@ -39,6 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
