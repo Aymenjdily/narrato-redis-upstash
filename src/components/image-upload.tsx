@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 
 import { IKImage, IKUpload, ImageKitProvider } from "imagekitio-next";
-import { Upload } from "lucide-react";
+import { Loader, Upload } from "lucide-react";
 
 import { toast } from "@/hooks/use-toast";
 import config from "@/lib/config";
@@ -53,12 +53,25 @@ const ImageUpload = ({ onFileChange }: ImageUpload) => {
   };
 
   const handleSuccess = (res: any) => {
-    setFile(res);
-    onFileChange(res.filePath);
-    toast({
-      title: "Image uploaded successfully",
-      description: `${res.filePath} uploaded successfully!`,
-    });
+    try {
+      setIsUploading(true);
+      setFile(res);
+      onFileChange(res.filePath);
+      toast({
+        title: "Image uploaded successfully",
+        description: `${res.filePath} uploaded successfully!`,
+      });
+    } catch (error) {
+      console.log("UPLOAD_ERROR", error);
+
+      toast({
+        title: "Image upload failed",
+        description: "Your image could not be uplaoded. Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -83,8 +96,10 @@ const ImageUpload = ({ onFileChange }: ImageUpload) => {
             ref.current?.click();
           }
         }}
+        disabled={isUploading}
       >
-        <Upload />
+        {isUploading ? <Loader className="animate-spin" /> : <Upload />}
+
         <p>Upload a File</p>
 
         {file && <p>{file.filePath}</p>}
