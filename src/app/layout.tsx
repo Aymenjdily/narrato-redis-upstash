@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Jost, Knewave } from "next/font/google";
 
+import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/providers/theme-provider";
 
+import { auth } from "../../auth";
 import "./globals.css";
 
 const barriecito = Knewave({
@@ -23,26 +25,30 @@ export const metadata: Metadata = {
     "Discover a world of stories with Narrato, your ultimate eBook library. Explore, read, and organize books effortlessly. Dive into knowledge anytime, anywhere!",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${barriecito.className} ${jost.className} antialiased`}
         suppressHydrationWarning
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <SessionProvider session={session}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

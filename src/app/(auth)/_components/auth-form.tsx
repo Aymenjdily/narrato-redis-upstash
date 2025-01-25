@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   DefaultValues,
@@ -23,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants/fields";
+import { useToast } from "@/hooks/use-toast";
 
 type AuthForm<T extends FieldValues> = {
   type: "sign-in" | "sign-up";
@@ -48,16 +51,36 @@ const AuthForm = <T extends FieldValues>({
   defaultValues,
   onSubmit,
 }: AuthForm<T>) => {
+  const { toast } = useToast();
+  const router = useRouter();
+
   const form: UseFormReturn<T> = useForm({
     resolver: zodResolver(type === "sign-in" ? SignInSchema : SignUpSchema),
     defaultValues: defaultValues as DefaultValues<T>,
   });
 
-  const handleSubmit: SubmitHandler<T> = async (values) => {
-    console.log(values);
-  };
-
   const isSignIn = type === "sign-in";
+
+  const handleSubmit: SubmitHandler<T> = async (values) => {
+    const result = await onSubmit(values);
+
+    if (result.success) {
+      toast({
+        title: "Success",
+        description: isSignIn
+          ? "You have successfully signed in."
+          : "You have successfully signed up.",
+      });
+
+      router.push("/");
+    } else {
+      toast({
+        title: `Error ${isSignIn ? "signing in" : "signing up"}`,
+        description: result.error ?? "An error occurred.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="flex w-full flex-col gap-4">
